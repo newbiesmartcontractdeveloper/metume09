@@ -164,7 +164,8 @@ def main():
     ap.add_argument("--bisiklet", type=float, default=15.0, help="bisiklet+ekipman (kg)")
     ap.add_argument("--sicaklik", type=float, default=18.0, help="hava sıcaklığı (C)")
     ap.add_argument("--cda", type=float, default=0.45)
-    ap.add_argument("--crr", type=float, default=0.0080)
+    ap.add_argument("--crr", type=float, default=0.0115,
+                    help="varsayılan: Schwalbe Delta Cruiser Plus 700x38C, düşük basınç")
     args = ap.parse_args()
 
     r = Ride(args.gpx, args.kilo, args.bisiklet, args.sicaklik, args.cda, args.crr)
@@ -203,12 +204,13 @@ def main():
     print(f"  {'senaryo':<44} {'süre':>8}   kazanç")
     print(f"  {'mevcut kurulum':<44} {hms(ref):>8}   referans ({r.d[-1]/ref*3.6:.1f} km/h)")
     for cda, crr, dm, label in [
-        (r.cda, 0.0065, 0.0, "doğru basınç (Crr -> .0065)"),
+        (r.cda, 0.0100, 0.0, "doğru basınç, aynı lastik (Crr -> .0100)"),
         (0.38, r.crr, 0.0, "pozisyon + dar kıyafet (CdA -> .38)"),
-        (r.cda, 0.0045, 0.0, "slick lastik + doğru basınç (Crr -> .0045)"),
+        (r.cda, 0.0050, -0.7, "700x35-38 iyi slick (Crr -> .0050)"),
+        (r.cda, 0.0040, -0.8, "700x32-35 üst sınıf yol lastiği (Crr -> .0040)"),
         (r.cda, r.crr, -2.0, "rijit çatal / -2 kg"),
-        (0.40, 0.0055, 0.0, "ucuz paket (basınç + pozisyon + kıyafet)"),
-        (0.38, 0.0045, -2.0, "tam paket (lastik + rijit çatal dahil)"),
+        (0.40, 0.0070, -0.4, "ucuz paket (basınç + pozisyon + orta slick)"),
+        (0.38, 0.0040, -1.2, "tam paket (üst sınıf lastik + TPU + pozisyon)"),
     ]:
         t = r.scenario_time(cda, crr, r.mass + dm)
         print(f"  {label:<44} {hms(t):>8}   {(t-ref)/60:+.1f} dk / "
